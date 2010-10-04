@@ -34,6 +34,9 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="filtering_sorting.html" title="Filtering And Sorting"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -50,6 +53,22 @@
             
   <div class="section" id="tastypie-cookbook">
 <span id="ref-cookbook"></span><h1>Tastypie Cookbook<a class="headerlink" href="#tastypie-cookbook" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="adding-custom-values">
+<h2>Adding Custom Values<a class="headerlink" href="#adding-custom-values" title="Permalink to this headline">¶</a></h2>
+<p>You might encounter cases where you wish to include additional data in a
+response which is not obtained from a field or method on your model. You can
+easily extend the <tt class="xref py py-meth docutils literal"><span class="pre">dehydrate()</span></tt> method to
+provide additional values:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="k">class</span> <span class="nc">MyModelResource</span><span class="p">(</span><span class="n">Resource</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">qs</span> <span class="o">=</span> <span class="n">MyModel</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">dehydrate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bundle</span><span class="p">):</span>
+        <span class="n">bundle</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s">&#39;custom_field&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&quot;Whatever you want&quot;</span>
+        <span class="k">return</span> <span class="n">bundle</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -58,6 +77,14 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="toc.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tastypie Cookbook</a><ul>
+<li><a class="reference internal" href="#adding-custom-values">Adding Custom Values</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="caching.html"
                         title="previous chapter">Caching</a></p>
@@ -92,6 +119,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="filtering_sorting.html" title="Filtering And Sorting"
              >next</a> |</li>

@@ -34,6 +34,9 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="serialization.html" title="Serialization"
              accesskey="N">next</a> |</li>
         <li class="right" >
@@ -50,6 +53,57 @@
             
   <div class="section" id="filtering-and-sorting">
 <span id="ref-filtering-sorting"></span><h1>Filtering And Sorting<a class="headerlink" href="#filtering-and-sorting" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="basic-filtering">
+<h2>Basic Filtering<a class="headerlink" href="#basic-filtering" title="Permalink to this headline">¶</a></h2>
+<p><tt class="xref py py-class docutils literal"><span class="pre">ModelResource</span></tt> provides a basic Django ORM filter
+interface. Simply list the resource fields which you&#8217;d like to filter on and
+the allowed expression in a <cite>filtering</cite> property of your resource&#8217;s Meta
+class:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">tastypie.constants</span> <span class="kn">import</span> <span class="n">ALL</span><span class="p">,</span> <span class="n">ALL_WITH_RELATIONS</span>
+
+<span class="k">class</span> <span class="nc">MyResource</span><span class="p">(</span><span class="n">ModelResource</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">filtering</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s">&quot;slug&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s">&#39;exact&#39;</span><span class="p">,</span> <span class="s">&#39;startswith&#39;</span><span class="p">,),</span>
+            <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="n">ALL</span><span class="p">,</span>
+        <span class="p">}</span>
+</pre></div>
+</div>
+<p>Valid filtering values are: Django ORM filters (e.g. <tt class="docutils literal"><span class="pre">startswith</span></tt>,
+<tt class="docutils literal"><span class="pre">exact</span></tt>, <tt class="docutils literal"><span class="pre">lte</span></tt>, etc. or the <tt class="docutils literal"><span class="pre">ALL</span></tt> or <tt class="docutils literal"><span class="pre">ALL_WITH_RELATIONS</span></tt> constants
+defined in <a class="reference internal" href="reference/constants.html#module-tastypie.constants" title="tastypie.constants"><tt class="xref py py-mod docutils literal"><span class="pre">tastypie.constants</span></tt></a>.</p>
+<p>These filters will be extracted from URL query strings using the same
+double-underscore syntax as the Django ORM:</p>
+<div class="highlight-python"><pre>/api/v1/myresource/?slug=myslug
+/api/v1/myresource/?slug__startswith=test</pre>
+</div>
+</div>
+<div class="section" id="advanced-filtering">
+<h2>Advanced Filtering<a class="headerlink" href="#advanced-filtering" title="Permalink to this headline">¶</a></h2>
+<p>If you need to filter things other than ORM resources or wish to apply
+additional constraints (e.g. text filtering using <cite>django-haystack
+&lt;http://haystacksearch.org&gt;</cite> rather than simple database queries) your
+<tt class="xref py py-class docutils literal"><span class="pre">Resource</span></tt> may define a custom
+<tt class="xref py py-meth docutils literal"><span class="pre">build_filters()</span></tt> method which allows you to
+filter the queryset before processing a request:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">haystack.query</span> <span class="kn">import</span> <span class="n">SearchQuerySet</span>
+
+<span class="k">class</span> <span class="nc">MyResource</span><span class="p">(</span><span class="n">Resource</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">build_filters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filters</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">filters</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">filters</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="n">orm_filters</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">MyResource</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">build_filters</span><span class="p">(</span><span class="n">filters</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s">&quot;q&quot;</span> <span class="ow">in</span> <span class="n">filters</span><span class="p">:</span>
+            <span class="n">sqs</span> <span class="o">=</span> <span class="n">SearchQuerySet</span><span class="p">()</span><span class="o">.</span><span class="n">auto_query</span><span class="p">(</span><span class="n">filters</span><span class="p">[</span><span class="s">&#39;q&#39;</span><span class="p">])</span>
+
+            <span class="n">orm_filters</span> <span class="o">=</span> <span class="p">{</span><span class="s">&quot;pk__in&quot;</span><span class="p">:</span> <span class="p">[</span> <span class="n">i</span><span class="o">.</span><span class="n">pk</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">sqs</span> <span class="p">]}</span>
+
+        <span class="k">return</span> <span class="n">orm_filters</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -58,6 +112,15 @@
       </div>
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
+  <h3><a href="toc.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Filtering And Sorting</a><ul>
+<li><a class="reference internal" href="#basic-filtering">Basic Filtering</a></li>
+<li><a class="reference internal" href="#advanced-filtering">Advanced Filtering</a></li>
+</ul>
+</li>
+</ul>
+
   <h4>Previous topic</h4>
   <p class="topless"><a href="cookbook.html"
                         title="previous chapter">Tastypie Cookbook</a></p>
@@ -92,6 +155,9 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
         <li class="right" >
           <a href="serialization.html" title="Serialization"
              >next</a> |</li>
